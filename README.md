@@ -46,3 +46,7 @@ TODO
 -Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
  such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
  as well.
+ 
+ - Once DCF functionality is completely finished, create additional features to essentially screen stocks based on highest DCF output      value. Possibly use an index full of the S&P500 stocks and create DCF's for each one, then compare %gains to one another and find the top performers. 
+ 
+ - Will have to deal with inconsistent data standardization, the screener that is outlined above ^^^^^ would be a good way to test how often the data is wrong. This can be done by checking the net/total profits and operating margins that are from the ouput of the DCF file and comparing them with the net/total profits and operating margins that are outlined in the actual data file that was downloaded from morningstar.
