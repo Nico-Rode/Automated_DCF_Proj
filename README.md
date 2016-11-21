@@ -7,6 +7,10 @@ PyFinancialData
 
 -Data is fetched from Morningstar and Yahoo Finance.
 
+-FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
+ TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
+ For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
+
 
 - Credit to VincentRaia for the skeleton code of pulling the financial data from Morningstar and Yahoo
    - https://github.com/VincentRaia
@@ -34,10 +38,6 @@ TODO
 
 -Still need to fix all the functions on the function page, follow format of functions.revenue, or
  functions.cost_of_goods, functions.income_before_taxed, etc.
-
--FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
- TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
- For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
 
 -Consider making the BASE_CASE_Excel_Rows a dictionary of which the keys are the names of the metrics.
 
