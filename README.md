@@ -30,19 +30,19 @@ TODO
 
 -Add graphing capability
 
-#Net income is off a little, the column that doesn't match is SG&A + other expenses. Need to investigate further
+-Net income is off a little, the column that doesn't match is SG&A + other expenses. Need to investigate further
 
-#Still need to fix all the functions on the function page, follow format of functions.revenue, or
-# functions.cost_of_goods, functions.income_before_taxed, etc.
+-Still need to fix all the functions on the function page, follow format of functions.revenue, or
+ functions.cost_of_goods, functions.income_before_taxed, etc.
 
-#FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
-#TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
-#For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
+-FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
+ TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
+ For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
 
-#Consider making the BASE_CASE_Excel_Rows a dictionary of which the keys are the names of the metrics.
+-Consider making the BASE_CASE_Excel_Rows a dictionary of which the keys are the names of the metrics.
 
-#Still need various QA implementations, and more efficient and cleaner code to grab all the data
+-Still need various QA implementations, and more efficient and cleaner code to grab all the data
 
-#Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
-#such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
-#as well.
+-Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
+ such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
+ as well.
