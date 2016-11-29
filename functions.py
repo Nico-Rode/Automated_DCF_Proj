@@ -36,7 +36,10 @@ def cash_and_equivalents(ticker,frequency,time):
 
 def short_term_investments(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc['Short-term investments',time]
+    historical_short_term_investments = {}
+    for date in range(0, time):
+        historical_short_term_investments[date] = df.ix["Short-term investments", date]
+    return historical_short_term_investments
 
 def total_cash(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
@@ -48,11 +51,21 @@ def receivables(ticker,frequency,time):
 
 def inventories(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc['Inventories',time]
+    historical_inventories = {}
+    for date in range(0, time):
+        historical_inventories[date] = df.ix["Inventories", date]
+    return historical_inventories
 
 def prepaid_expenses(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     return df.loc['Prepaid expenses',time]
+
+def current_assets(ticker,frequency,time):
+    df = financials_download(ticker, 'bs',frequency)
+    historical_current_assets = {}
+    for date in range(0, time):
+        historical_current_assets[date] = df.ix["Total current assets", date]
+    return historical_current_assets
 
 def other_current_assets(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
@@ -97,13 +110,25 @@ def total_assets(ticker,frequency,time):
         historical_assests[date] = df.ix["Total assets",date]
     return historical_assests
 
+def capital_expenditures(ticker,frequency,time):
+    df = financials_download(ticker, 'cf', frequency)
+    historical_capital_expenditures = {}
+    for date in range(0, time):
+        historical_capital_expenditures[date] = df.ix["Capital expenditure", date]
+    return historical_capital_expenditures
+
+
 def accounts_payable(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     return df.loc['Accounts payable',time]
 
 def shortterm_debt(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc['Short-term debt',time]
+    historical_short_term_debt = {}
+    for date in range(0, time):
+        historical_short_term_debt[date] = df.ix["Short-term debt", date]
+    return historical_short_term_debt
+
 
 def accrued_liabilities(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
@@ -115,11 +140,18 @@ def other_current_liabilities(ticker,frequency,time):
 
 def total_current_liabilities(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc['Total current liabilities',time]
+    historical_current_long_term_debt = {}
+    for date in range(0, time):
+        historical_current_long_term_debt[date] = df.ix["Total current liabilities", date]
+    return historical_current_long_term_debt
 
 def longterm_debt(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc['Long-term debt',time]
+    historical_Long_term_debt = {}
+    for date in range(0, time):
+        historical_Long_term_debt[date] = df.ix["Long-term debt", date]
+    return historical_Long_term_debt
+
 
 def deferred_taxes_liabilities(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
@@ -143,7 +175,10 @@ def total_noncurrent_liabilities(ticker,frequency,time):
 
 def total_liabilities(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc['Total liabilities',time]
+    historical_total_liabilities = {}
+    for date in range(0, time):
+        historical_total_liabilities[date] = df.ix["Total liabilities", date]
+    return historical_total_liabilities
 
 def common_stock(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
@@ -167,7 +202,10 @@ def accumulated_other_comprehensive_income(ticker,frequency,time):
 
 def total_stockholder_equity(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
-    return df.loc["Total Stockholders' equity",time]
+    historical_stockholder_equity = {}
+    for date in range(0, time):
+        historical_stockholder_equity[date] = df.ix["Total stockholders' equity", date]
+    return historical_stockholder_equity
 
 def total_liabilities_and_stockholders_equity(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
@@ -196,8 +234,13 @@ def sales_administrative_expense(ticker,frequency,time):
     return historical_SG_A
 
 def depreciation_amort_expense(ticker,frequency,time):
-    df = financials_download(ticker,'is',frequency)
-    return df.loc["Depreciation and amortization",time]
+    df = financials_download(ticker,'cf',frequency)
+    historical_depreciation = {}
+    for date in range(0, time):
+        historical_depreciation[date] = df.ix["Depreciation & amortization", date]
+    return historical_depreciation
+
+
 
 def interest_expense(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
