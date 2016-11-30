@@ -86,7 +86,7 @@ DCF_file = openpyxl.load_workbook(filename="WSIG DCF Template.xlsx")
 #***********************************************************************************
 
 
-#**************************INPUTTING DATA FOR INCOME STATMENT ON BASECASE************************
+#**************************INPUTTING DATA FOR INCOME STATMENT ON BASECASE***********************
 # DCF_file = openpyxl.load_workbook(filename="WSIG DCF Template.xlsx")
 # Base_Case_sheet = DCF_file.get_sheet_by_name("Base Case")
 #
