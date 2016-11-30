@@ -5,31 +5,29 @@ import quandl
 
 #****************************************READ ME***********************************
 
-#Net income is off a little, the column that doesn't match is SG&A + other expenses. Need to investigate further
+# THIS IS ENTIRELY DEPENDANT ON MORNGINGSTAR; IF THEY DECIDE TO CHANGE THEIR URL ADDRESSES OR SHUTDOWN THIS
+# PROGRAM BECOMES USELESS.
 
-#Still need to fix all the functions on the function page, follow format of functions.revenue, or
-# functions.cost_of_goods, functions.income_before_taxed, etc.
+# FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
+# TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
+# For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
 
-#FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
-#TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
-#For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
-
-#Consider making the BASE_CASE_Excel_Rows a dictionary of which the keys are the names of the metrics.
-
-#Still need various QA implementations, and more efficient and cleaner code to grab all the data
-
-#Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
-#such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
-#as well.
 
 #**********************************************************************************
 
 
-#**************************************OTHER THOUGHTS******************************
+#************************************** TO DO ******************************
 
-# Figure out the best way to pull all the data. Since you'll be doing one stock at a time, it feels rather inefficient
-# to download the same csv files over and over again. Maybe download once and then pull the data from the excel file?
-# Only disadvantage to that is that it would be more low level and dealing with openpyxl functionality which is tough
+# Still need to fix all the functions on the function page, follow format of functions.revenue, or
+# functions.cost_of_goods, functions.income_before_taxed, etc.
+
+# Still need various QA implementations, and more efficient and cleaner code to grab all the data. Maybe download the
+# income statement, balance sheet, and cashflow sheet ONCE and put them into three separate data frames. From
+# there you can parse through in order to find the relevant metrics for each functions.
+
+# Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
+# such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
+# as well.
 
 # Also need to figure out a way to deal with modularity and flexibility. By these I mean what happens when the rows
 # don't exactly match the ones in your array. What happens when the numbers don't add up or a stock doesn't label their
@@ -38,7 +36,16 @@ import quandl
 # If you pair the attribute name and then continue with the low level approach of working down with the excel file,
 # I think that it would absolutely ensure accuracy when placing the data, even if the row and column NUMBERS change.
 
+# Maybe implement machine learning functions in order to make educated guesses on assumptions
 
+# You for sure can pull data for the initial global assumptions though
+
+# Modularity is HUGE
+
+# Safe guards to check and see if the stock's net income, free cash flow, etc. match up with the ones found in the
+# csv files and the company's reported numbers.
+
+# Make sure to check and see if the data is reported in millions or thousands; if thousands then just truncate the nums
 
 #**************************TICKER************************
 ticker = "AAPL"
@@ -63,14 +70,19 @@ ticker = "AAPL"
 #**************************BASE CASE ROWS & COLUMNS************************
 Base_Case_Excel_Rows = ['4','5','7','9','10','11','15','16','19','20','21','22','23','24','25','26','27'] #Relevant rows that need inputs on Base Case sheet
 Base_Case_Excel_Col = ['F','E','D','C','B'] #Relevant columns that need inputs on Base Case sheet
-DCF_Data_Keys = ["Revenue","COGS","SG&A","Income before taxes","Provision for income expense","Other income expense","Depreciation_and_amort","CAPEX","Inventories","Short Term Investments","Current Assets","Total Assets","Short-term debt","Total Current Liabilities","Long-term debt","Total Liabilities",
+DCF_Data_Keys = ["Revenue","COGS","SG&A and other expenses","Income before taxes","Provision for income expense","Other income expense",
+                 "CAPEX","Depreciation_and_amort","Inventories","Short Term Investments","Current Assets","Total Assets"
+    ,"Short-term debt","Total Current Liabilities","Long-term debt","Total Liabilities",
                  "Total stockholder's equity"]
 #**************************************************************************
 
 
 #**************************Income statement metrics for DCF************************
-#array of current financial metrics, right now only contains Income statement elements
+
+# Dict of current financial metrics; contains all relevant metrics for DCF process
 DCF_Data = {}
+DCF_file = openpyxl.load_workbook(filename="WSIG DCF Template.xlsx")
+
 #***********************************************************************************
 
 
@@ -89,7 +101,7 @@ DCF_Data = {}
 #*****************************************************************************************************
 
 
-def get_cashflow_statements(ticker):
+def get_cashflow_statements(ticker): # FOR SOME REASON THIS IS THE QUARTERLY REPORT, NOT ANNUAL
     Cashflow_statement = {}
 
     Cashflow_statement["Depreciation_and_amort"] = functions.depreciation_amort_expense(ticker=ticker,frequency='A',time=5)
@@ -102,10 +114,13 @@ def get_income_statement(ticker):
 
     Income_statement["Revenue"] = functions.revenue(ticker=ticker, time=5)
     Income_statement["COGS"] = functions.cost_of_goods(ticker=ticker, frequency="A", time=5)
-    Income_statement["SG&A"] = functions.sales_administrative_expense(ticker=ticker, frequency="A", time=5)
+    Income_statement["SG&A and other expenses"] = functions.sga_and_other_expenses(ticker=ticker, frequency="A", time=5)  # Off a little//Maybe fixed now?
     Income_statement["Income before taxes"] = functions.income_before_taxed(ticker=ticker, frequency="A", time=5)
     Income_statement["Provision for income expense"] = functions.provision_for_income_expense(ticker=ticker, frequency="A", time=5)
     Income_statement["Other income expense"] = functions.other_income_expense(ticker=ticker, frequency="A", time=5)
+
+    # Is net income formula wrong? It's off by the amount of "Other income expense" If you take it out of the formula
+    # in row 12, then the numbers match up. Check it out
 
     return Income_statement
 
@@ -113,42 +128,52 @@ def get_balance_sheet(ticker):
     Balance_sheet = {}
 
     Balance_sheet["Inventories"] = functions.inventories(ticker=ticker, frequency='A',time=5)
-    Balance_sheet["Short Term Investments"] = functions.short_term_investments(ticker=ticker,frequency='A',time=5) # doesn't include cash, might not match up with 10k output
-    Balance_sheet["Current Assets"] = functions.current_assets(ticker=ticker,frequency='A',time=5) # No idea if this works, check 'BS'
+    Balance_sheet["Short Term Investments"] = functions.cash_and_short_term_investments(ticker=ticker,frequency='A',time=5) # Changed, but not sure if this adds up correctly
+    Balance_sheet["Current Assets"] = functions.current_assets(ticker=ticker,frequency='A',time=5)
     Balance_sheet["Total Assets"] = functions.total_assets(ticker=ticker, frequency='A',time=5)
-    Balance_sheet["Short-term debt"] = functions.shortterm_debt(ticker=ticker,frequency='A',time=5) #Again, this is just short term debt, doesn't include long term portion
+    Balance_sheet["Short-term debt"] = functions.shortterm_debt(ticker=ticker,frequency='A',time=5) # This doesnt add up
     Balance_sheet["Total Current Liabilities"] = functions.total_current_liabilities(ticker=ticker,frequency='A',time=5)
-    Balance_sheet["Long-term debt"] = functions.longterm_debt(ticker=ticker, frequency='A',time=5) #Not sure if this is the actual TOTAL long term debt
+    Balance_sheet["Long-term debt"] = functions.longterm_debt(ticker=ticker, frequency='A',time=5)
 
-    Balance_sheet["Total Liabilities"] = functions.total_liabilities(ticker=ticker,frequency='A',time=5) #DCF calls for the combination of these two? Just double check
-    Balance_sheet["Total stockholder's equity"] = functions.total_stockholder_equity(ticker=ticker,frequency='A',time=5) # and make sure that the numbers add up
+    Balance_sheet["Total Liabilities"] = functions.total_liabilities(ticker=ticker,frequency='A',time=5)
+    Balance_sheet["Total stockholder's equity"] = functions.total_stockholder_equity(ticker=ticker,frequency='A',time=5)
     #Balance_sheet["Change in working Capital"] = functions.working_capital() # This is an optional field in the DCF implement if you have time
-
-    print Balance_sheet
-
-
 
     return Balance_sheet
 
 def populate_DCF(DCF_Data):
-
-    DCF_file = openpyxl.load_workbook(filename="WSIG DCF Template.xlsx")
     Base_Case_sheet = DCF_file.get_sheet_by_name("Base Case")
 
-    for data in range(0, len(DCF_Data)): #For how every many financial metrics you have
+    for data in range(0, len(DCF_Data)): # For how every many financial metrics you have (17)*
         counter = 0
         for col in Base_Case_Excel_Col: #Go through the 5 columns
             # print "DCF data:    ", DCF_Data_Keys[data]
             # print "counter:     ", counter
-            Base_Case_sheet[col + Base_Case_Excel_Rows[data]] = DCF_Data[DCF_Data_Keys[data]][counter] #Insert the corresponding year-metric to each year column
-            counter = counter + 1 #Makes sure that the DCF data gets all 5 of the entries for the metric
+            Base_Case_sheet[col + Base_Case_Excel_Rows[data]] = DCF_Data[DCF_Data_Keys[data]][counter]
+            # Insert the corresponding year-metric to each year column
+            # It references the dictionary within the dictionary. DCF_data is the singular dict that is
+            # comprised of the three previous ones. (balance, income, cashflow)
 
-            #HOLY FUCKING SHIT THIS WORKS
+            # DCF_Data_Keys is the list of keys that is found within the Indexes through with
+            # [counter] going up to 5 (num of columns) and [data] going up to number of attributes in DCF model
+            # which is 17 at the moment of this writing.
+            counter += 1  # Makes sure that the DCF data gets all 5 of the entries for the metric
 
+            # Holy shit. it works.
+
+    if Base_Case_sheet['F6'] is not functions.gross_income(ticker=ticker,frequency='A',time=1):
+        print "Error in Gross income"
+    if Base_Case_sheet['F8'] is not functions.operating_income(ticker=ticker,time=1):
+        print "Error in Operating income"
+    if Base_Case_sheet['F12'] is not functions.net_income(ticker=ticker,frequency='A',time=1):
+        print "Error in net income"
     DCF_file.save("WSIG DCF Output.xlsx")
 
 
 def Automate_DCF(ticker):
+
+    # Appends all three function dictionaries (income statement, cashflow statement, and balance sheet)
+    # to one singular dict
     DCF_Data.update(get_income_statement(ticker=ticker))
     DCF_Data.update(get_cashflow_statements(ticker=ticker))
     DCF_Data.update(get_balance_sheet(ticker=ticker))
@@ -159,6 +184,16 @@ def Automate_DCF(ticker):
     populate_DCF(DCF_Data)
 
 
+def Begin():
+
+    # Preliminary function to set up sheets for proper automation
+    Title_sheet = DCF_file.get_sheet_by_name("Title Page")
+    Title_sheet['B4'] = ticker
+    Title_sheet['B10'] = '9/18/2016'
+    Title_sheet['B11'] = '12/18/2016'
 
 
+
+Begin()
 Automate_DCF(ticker)
+

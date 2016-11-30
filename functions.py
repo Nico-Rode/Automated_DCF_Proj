@@ -6,7 +6,8 @@ import re
 # dates = ["2012", "2013","2014","2015","2016"]
 dates = ["2016", "2015","2014","2013","2012"]
 
-
+# URL = is just a way to download the csv files from morningstar. Url's utilize variables in their address's to download
+# the corresponding files. IF MORNINGSTAR CHANGES THEIR URL ADDRESSES THIS ENTIRE PROGRAM IS BROKEN.
 
 def financials_download(ticker,report,frequency):
     if frequency == "A" or frequency == "a":
@@ -222,9 +223,21 @@ def cost_of_goods(ticker,frequency,time):
         historical_cost_of_goods[date] = df.ix["Cost of revenue", date]
     return historical_cost_of_goods
 
-def gross_profit(ticker,frequency,time):
+def gross_income(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
-    return df.loc["Gross profit",time]
+    historical_gross_income = {}
+    for date in range(0,time):
+        historical_gross_income[date] = df.ix["Gross profit",time]
+    return historical_gross_income
+
+def cash_and_short_term_investments(ticker, frequency, time):
+    df = financials_download(ticker,'bs',frequency)
+    historical_cash_and_investments = {}
+    for date in range(0,time):
+        historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date] + \
+                                                df.ix["Short-term investments",date]
+    return historical_cash_and_investments
+
 
 def sales_administrative_expense(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
@@ -232,6 +245,13 @@ def sales_administrative_expense(ticker,frequency,time):
     for date in range(0, time):
         historical_SG_A[date] = df.ix["Sales, General and administrative", date]
     return historical_SG_A
+
+def sga_and_other_expenses(ticker,frequency,time):
+    df = financials_download(ticker,'is',frequency)
+    historical_sga_and_other = {}
+    for date in range(0, time):
+        historical_sga_and_other[date] = df.ix["Total operating expenses", date]
+    return historical_sga_and_other
 
 def depreciation_amort_expense(ticker,frequency,time):
     df = financials_download(ticker,'cf',frequency)
@@ -281,7 +301,10 @@ def net_income_contin_ops(ticker,frequency,time):
 
 def net_income(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
-    return df.loc["Net income",time]
+    historical_net_income = {}
+    for date in range(0,time):
+        historical_net_income[date] = df.ix["Net income",date]
+    return historical_net_income
 
 def preferred_dividend(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
@@ -390,8 +413,11 @@ def revenue(ticker,time):
     return historical_revenue
 
 def operating_income(ticker,time):
-    df = ratios_download(ticker)
-    return df.loc["Operating Income USD Mil",time]
+    df = financials_download(ticker,'is','A')
+    historical_operating_income = {}
+    for date in range(0,time):
+        historical_operating_income[date] = df.ix["Operating income",date]
+    return historical_operating_income
 
 def capital_expenditure(ticker,time):
     df = ratios_download(ticker)
