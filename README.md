@@ -27,26 +27,46 @@ Dependencies
 -Quandl
 
 
-TODO
 ===============
 
--Fix financial statement requests for bank stocks
+# THIS IS ENTIRELY DEPENDANT ON MORNGINGSTAR; IF THEY DECIDE TO CHANGE THEIR URL ADDRESSES OR SHUTDOWN THIS
+# PROGRAM BECOMES USELESS.
 
--Add graphing capability
+# FREQUENCY refers to Annual (A), or Quarterly (Q) for financial metrics,
+# TIME is how many columns (Years) the script scrapes from the downloaded excel file (1 - 5)
+# For a pure DCF Implementation the default TIME should be 5 representing the last 5 years of financial data
 
--Net income is off a little, the column that doesn't match is SG&A + other expenses. Need to investigate further
 
--Still need to fix all the functions on the function page, follow format of functions.revenue, or
- functions.cost_of_goods, functions.income_before_taxed, etc.
+#**********************************************************************************
 
--Consider making the BASE_CASE_Excel_Rows a dictionary of which the keys are the names of the metrics.
 
--Still need various QA implementations, and more efficient and cleaner code to grab all the data
+#************************************** TO DO ******************************
 
--Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
- such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
- as well.
- 
- - Once DCF functionality is completely finished, create additional features to essentially screen stocks based on highest DCF output      value. Possibly use an index full of the S&P500 stocks and create DCF's for each one, then compare %gains to one another and find the top performers. 
- 
- - Will have to deal with inconsistent data standardization, the screener that is outlined above ^^^^^ would be a good way to test how often the data is wrong. This can be done by checking the net/total profits and operating margins that are from the ouput of the DCF file and comparing them with the net/total profits and operating margins that are outlined in the actual data file that was downloaded from morningstar.
+# Still need to fix all the functions on the function page, follow format of functions.revenue, or
+# functions.cost_of_goods, functions.income_before_taxed, etc.
+
+# Still need various QA implementations, and more efficient and cleaner code to grab all the data. Maybe download the
+# income statement, balance sheet, and cashflow sheet ONCE and put them into three separate data frames. From
+# there you can parse through in order to find the relevant metrics for each functions.
+
+# Implement different functions for overall DCF process and segment the parts of DCF process into smaller functions
+# such as the implementation of the Income statement, Balance sheet, and Cashflow, add functionality for other Metrics
+# as well.
+
+# Also need to figure out a way to deal with modularity and flexibility. By these I mean what happens when the rows
+# don't exactly match the ones in your array. What happens when the numbers don't add up or a stock doesn't label their
+# data the exact same as you have it. This will take a lot of trial and error, try and except blocks. You also thought
+# about using either the row #, or the attribute name as it appears in the excel file as keys for the dictionary.
+# If you pair the attribute name and then continue with the low level approach of working down with the excel file,
+# I think that it would absolutely ensure accuracy when placing the data, even if the row and column NUMBERS change.
+
+# Maybe implement machine learning functions in order to make educated guesses on assumptions
+
+# You for sure can pull data for the initial global assumptions though
+
+# Modularity is HUGE
+
+# Safe guards to check and see if the stock's net income, free cash flow, etc. match up with the ones found in the
+# csv files and the company's reported numbers.
+
+# Make sure to check and see if the data is reported in millions or thousands; if thousands then just truncate the nums
