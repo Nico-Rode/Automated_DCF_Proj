@@ -47,6 +47,8 @@ import quandl
 
 # Make sure to check and see if the data is reported in millions or thousands; if thousands then just truncate the nums
 
+# YOU HAVE TO CHECK FOR DIFFERENT NAMING CONVENTIONS. CHANGE TICKER TO CRM AND SEE THE ERRORS THAT POP UP.
+
 #**************************TICKER************************
 ticker = "AAPL"
 #********************************************************
@@ -71,7 +73,8 @@ ticker = "AAPL"
 Base_Case_Excel_Rows = ['4','5','7','9','10','11','15','16','19','20','21','22','23','24','25','26','27'] #Relevant rows that need inputs on Base Case sheet
 Base_Case_Excel_Col = ['F','E','D','C','B'] #Relevant columns that need inputs on Base Case sheet
 DCF_Data_Keys = ["Revenue","COGS","SG&A and other expenses","Income before taxes","Provision for income expense","Other income expense",
-                 "CAPEX","Depreciation_and_amort","Inventories","Short Term Investments","Current Assets","Total Assets"
+                 "CAPEX","Depreciation_and_amort", "Inventories"
+                  ,"Short Term Investments","Current Assets","Total Assets"
     ,"Short-term debt","Total Current Liabilities","Long-term debt","Total Liabilities",
                  "Total stockholder's equity"]
 #**************************************************************************
@@ -161,14 +164,21 @@ def populate_DCF(DCF_Data):
 
             # Holy shit. it works.
 
-    if Base_Case_sheet['F6'] is not functions.gross_income(ticker=ticker,frequency='A',time=1):
-        print "Error in Gross income"
-    if Base_Case_sheet['F8'] is not functions.operating_income(ticker=ticker,time=1):
-        print "Error in Operating income"
-    if Base_Case_sheet['F12'] is not functions.net_income(ticker=ticker,frequency='A',time=1):
-        print "Error in net income"
-    DCF_file.save("WSIG DCF Output.xlsx")
 
+    DCF_file.save("WSIG DCF Output.xlsx")
+    Output_Gross_Income = Base_Case_sheet['F4'].value - Base_Case_sheet['F5'].value
+    Output_Operating_Income = Output_Gross_Income - Base_Case_sheet['F7'].value
+    Output_Net_Income = Base_Case_sheet['F9'].value - Base_Case_sheet['F10'].value + Base_Case_sheet['F11'].value
+
+    # Checking to see if the calculated cells in the output file match the official numbers from morning star
+
+    if Output_Gross_Income >= (functions.gross_income(ticker=ticker,frequency='A',time=1)[0]+2) or Output_Gross_Income <= (functions.gross_income(ticker=ticker,frequency='A',time=1)[0]-2):
+        # print "BASE CASE: ", Output_Gross_Income, "CSV: ", functions.gross_income(ticker=ticker,frequency='A',time=1)[0]
+        print "Error in Gross income"
+    if Output_Operating_Income >= (functions.operating_income(ticker=ticker,time=1)[0]+2) or Output_Operating_Income <= (functions.operating_income(ticker=ticker,time=1)[0]-2):
+        print "Error in Operating income"
+    if Output_Net_Income >= (functions.net_income(ticker=ticker,frequency='A',time=1)[0]+2 or Output_Net_Income <= (functions.operating_income(ticker=ticker,time=1)[0]-2)):
+        print "Error in net income"
 
 def Automate_DCF(ticker):
 

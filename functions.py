@@ -227,7 +227,10 @@ def gross_income(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
     historical_gross_income = {}
     for date in range(0,time):
-        historical_gross_income[date] = df.ix["Gross profit",time]
+        # print "TIME: ",time
+        # print "DATE: ",date
+        historical_gross_income[date] = df.ix["Gross profit",date]
+
     return historical_gross_income
 
 def cash_and_short_term_investments(ticker, frequency, time):
