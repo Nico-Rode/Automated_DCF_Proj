@@ -1,11 +1,15 @@
 import urllib2
 import pandas as pd
-import re
+import math
 
 #TODO: Fix revenue Financial Firms (GS, WFC, etc.)
 # dates = ["2012", "2013","2014","2015","2016"]
 dates = ["2016", "2015","2014","2013","2012"]
-
+empty = [0,0,0,0,0]
+def print_urls(ticker):
+    print( "IS: ", 'http://financials.morningstar.com/ajax/ReportProcess4CSV.html?&t='+ticker+'&region=usa&culture=en-US&cur=USD&reportType=is&period=12&dataType=R&order=desc&columnYear=5&rounding=3&view=raw&r=640081&denominatorView=raw&number=3')
+    print( "BS: ", 'http://financials.morningstar.com/ajax/ReportProcess4CSV.html?&t='+ticker+'&region=usa&culture=en-US&cur=USD&reportType=bs&period=12&dataType=R&order=desc&columnYear=5&rounding=3&view=raw&r=640081&denominatorView=raw&number=3')
+    print( "CF: ", 'http://financials.morningstar.com/ajax/ReportProcess4CSV.html?&t='+ticker+'&region=usa&culture=en-US&cur=USD&reportType=cf&period=12&dataType=R&order=desc&columnYear=5&rounding=3&view=raw&r=640081&denominatorView=raw&number=3')
 # URL = is just a way to download the csv files from morningstar. Url's utilize variables in their address's to download
 # the corresponding files. IF MORNINGSTAR CHANGES THEIR URL ADDRESSES THIS ENTIRE PROGRAM IS BROKEN.
 
@@ -15,7 +19,7 @@ def financials_download(ticker,report,frequency):
     elif frequency == "Q" or frequency == "q":
         frequency = "3"
     url = 'http://financials.morningstar.com/ajax/ReportProcess4CSV.html?&t='+ticker+'&region=usa&culture=en-US&cur=USD&reportType='+report+'&period='+frequency+'&dataType=R&order=desc&columnYear=5&rounding=3&view=raw&r=640081&denominatorView=raw&number=3'
-    print(url)
+    # print(report, "         ", url)
     df = pd.read_csv(url, skiprows=1, index_col=0)
     #df.to_csv('test.csv')
     return df
@@ -39,7 +43,15 @@ def short_term_investments(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     historical_short_term_investments = {}
     for date in range(0, time):
-        historical_short_term_investments[date] = df.ix["Short-term investments", date]
+        try:
+            historical_short_term_investments[date] = df.ix["Short-term investments", date]
+        except:
+            try:
+                historical_short_term_investments[date] = df.ix["Equity and other investments", date]
+            except Exception as e:
+                print("Problem with:")
+                print(e)
+                print("In: ", date)
     return historical_short_term_investments
 
 def total_cash(ticker,frequency,time):
@@ -54,7 +66,16 @@ def inventories(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     historical_inventories = {}
     for date in range(0, time):
-        historical_inventories[date] = df.ix["Inventories", date]
+        try:
+            historical_inventories[date] = df.ix["Inventories", date]
+        except Exception as e:
+            print("Problem with:")
+            print(e)
+            print("In: ", date)
+            print("Set inventories to 0")
+            historical_inventories[date] = 0
+
+
     return historical_inventories
 
 def prepaid_expenses(ticker,frequency,time):
@@ -127,7 +148,14 @@ def shortterm_debt(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     historical_short_term_debt = {}
     for date in range(0, time):
-        historical_short_term_debt[date] = df.ix["Short-term debt", date]
+        try:
+            historical_short_term_debt[date] = df.ix["Short-term debt", date]
+        except Exception as e:
+            historical_short_term_debt[date] = '0'
+            print("Problem with:")
+            print(e)
+            print("Set short-term debt to 0")
+    print(historical_short_term_debt)
     return historical_short_term_debt
 
 
@@ -150,7 +178,14 @@ def longterm_debt(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     historical_Long_term_debt = {}
     for date in range(0, time):
-        historical_Long_term_debt[date] = df.ix["Long-term debt", date]
+        try:
+            historical_Long_term_debt[date] = df.ix["Long-term debt", date]
+        except Exception as e:
+            historical_Long_term_debt[date] = 0
+            print("Problem with:")
+            print(e)
+            print("In: ", date)
+            print("Set long-term as 0")
     return historical_Long_term_debt
 
 
@@ -205,7 +240,18 @@ def total_stockholder_equity(ticker,frequency,time):
     df = financials_download(ticker,'bs',frequency)
     historical_stockholder_equity = {}
     for date in range(0, time):
-        historical_stockholder_equity[date] = df.ix["Total stockholders' equity", date]
+        try:
+            historical_stockholder_equity[date] = df.ix["Total stockholders' equity", date]
+        except Exception as e:
+            print("Problem with:")
+            print(e)
+            print("In: ", date)
+            try:
+                historical_stockholder_equity[date] = df.ix["Total Stockholders' equity", date]
+            except Exception as e:
+                print("Problem with:")
+                print(e)
+                print("In: ", date)
     return historical_stockholder_equity
 
 def total_liabilities_and_stockholders_equity(ticker,frequency,time):
@@ -220,22 +266,69 @@ def cost_of_goods(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
     historical_cost_of_goods = {}
     for date in range(0, time):
-        historical_cost_of_goods[date] = df.ix["Cost of revenue", date]
+        try:
+            historical_cost_of_goods[date] = df.ix["Cost of revenue", date]
+        except Exception as e:
+            print("Problem with:")
+            print(e)
+            print("In: ", date)
+            try:
+                if math.isnan(df.ix["Other expenses", date]):
+                    historical_cost_of_goods[date] = df.ix["Other expenses", date]
+                elif math.isnan(df.ix["Interest expense", date]):
+                    historical_cost_of_goods[date] = df.ix["Interest expense", date]
+                else:
+                    historical_cost_of_goods[date] = df.ix["Other expenses", date] + df.ix["Interest expense", date]
+
+            except Exception as e:
+                print("Problem with:")
+                print(e)
+                print("In: ", date)
     return historical_cost_of_goods
 
 def gross_income(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
     historical_gross_income = {}
     for date in range(0,time):
-        historical_gross_income[date] = df.ix["Gross profit",time]
+        historical_gross_income[date] = df.ix["Gross profit",date]
     return historical_gross_income
 
 def cash_and_short_term_investments(ticker, frequency, time):
     df = financials_download(ticker,'bs',frequency)
     historical_cash_and_investments = {}
     for date in range(0,time):
-        historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date] + \
-                                                df.ix["Short-term investments",date]
+        try:
+            if math.isnan(df.ix["Cash and cash equivalents", date]):
+                historical_cash_and_investments[date] = df.ix["Short-term investments",date]
+            elif math.isnan(df.ix["Short-term investments",date]):
+                historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date]
+            else:
+                historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date] + \
+                                                    df.ix["Short-term investments",date]
+
+        except Exception as e:
+            try:
+                if math.isnan(df.ix["Cash and cash equivalents", date]):
+                    historical_cash_and_investments[date] = df.ix["Equity and other investments", date]
+                elif math.isnan(df.ix["Equity and other investments", date]):
+                    historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date]
+                else:
+                    historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date] + \
+                                                            df.ix["Equity and other investments", date]
+                print("Problem with:")
+                print(e)
+                print("In: ", date)
+            except Exception as e:
+                try:
+                    print("Problem with:")
+                    print(e)
+                    print("In: ", date)
+                    historical_cash_and_investments[date] = df.ix["Cash and cash equivalents", date]
+                except Exception as e:
+                    print("Problem with:")
+                    print(e)
+                    print("In: ", date)
+    print(historical_cash_and_investments)
     return historical_cash_and_investments
 
 
@@ -250,7 +343,18 @@ def sga_and_other_expenses(ticker,frequency,time):
     df = financials_download(ticker,'is',frequency)
     historical_sga_and_other = {}
     for date in range(0, time):
-        historical_sga_and_other[date] = df.ix["Total operating expenses", date]
+        try:
+            historical_sga_and_other[date] = df.ix["Total operating expenses", date]
+        except Exception as e:
+            print("Problem with:")
+            print(e)
+            print("In: ", date)
+            try:
+                historical_sga_and_other[date] = df.ix["Total costs and expenses", date]
+            except Exception as e:
+                print("Problem with:")
+                print(e)
+                print("In: ", date)
     return historical_sga_and_other
 
 def depreciation_amort_expense(ticker,frequency,time):
@@ -285,14 +389,20 @@ def other_income_expense(ticker, frequency, time):
     df = financials_download(ticker, 'is', frequency)
     historical_other_income_expense = {}
     for date in range(0, time):
-        historical_other_income_expense[date] = df.ix["Other income (expense)", date]
+        try:
+            historical_other_income_expense[date] = df.ix["Other income (expense)", date]
+        except:
+            historical_other_income_expense[date] = df.ix["Other", date]
     return historical_other_income_expense
 
 def income_before_taxed(ticker, frequency, time):
     df = financials_download(ticker, 'is', frequency)
     historical_income_before_taxes = {}
     for date in range(0, time):
-        historical_income_before_taxes[date] = df.ix["Income before taxes", date]
+        try:
+            historical_income_before_taxes[date] = df.ix["Income before taxes", date]
+        except:
+            historical_income_before_taxes[date] = df.ix["Income before income taxes", date]
     return historical_income_before_taxes
 
 def net_income_contin_ops(ticker,frequency,time):
@@ -408,8 +518,19 @@ def revenue(ticker,time):
     df = financials_download(ticker,'is','A')
     historical_revenue = {}
     for date in range(0, time):
-        historical_revenue[date] = df.ix["Revenue", date]
-        # print historical_revenue[date], "     ", dates[date]
+        try:
+            historical_revenue[date] = df.ix["Revenue", date]
+        except Exception as e:
+            print("Problem with:")
+            print(e)
+            print("In: ", date)
+            try:
+                historical_revenue[date] = df.ix["Total revenues", date]
+            except Exception as e:
+                print("Problem with:")
+                print(e)
+                print("In: ", date)
+
     return historical_revenue
 
 def operating_income(ticker,time):

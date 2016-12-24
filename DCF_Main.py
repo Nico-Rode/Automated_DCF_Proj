@@ -1,6 +1,7 @@
 import functions
 import openpyxl
 import quandl
+import time
 
 
 #****************************************READ ME***********************************
@@ -48,7 +49,7 @@ import quandl
 # Make sure to check and see if the data is reported in millions or thousands; if thousands then just truncate the nums
 
 #**************************TICKER************************
-ticker = "AAPL"
+ticker = "WLL"
 #********************************************************
 
 
@@ -149,7 +150,11 @@ def populate_DCF(DCF_Data):
         for col in Base_Case_Excel_Col: #Go through the 5 columns
             # print "DCF data:    ", DCF_Data_Keys[data]
             # print "counter:     ", counter
-            Base_Case_sheet[col + Base_Case_Excel_Rows[data]] = DCF_Data[DCF_Data_Keys[data]][counter]
+            # time.sleep(.5)
+            try:
+                Base_Case_sheet[col + Base_Case_Excel_Rows[data]] = DCF_Data[DCF_Data_Keys[data]][counter]
+            except Exception as e:
+                print(e)
             # Insert the corresponding year-metric to each year column
             # It references the dictionary within the dictionary. DCF_data is the singular dict that is
             # comprised of the three previous ones. (balance, income, cashflow)
@@ -160,14 +165,33 @@ def populate_DCF(DCF_Data):
             counter += 1  # Makes sure that the DCF data gets all 5 of the entries for the metric
 
             # Holy shit. it works.
+    print("Saving File")
+    DCF_file.save("WSIG DCF Output2.xlsx")
+    print("Saved File")
+    # print("Waiting")
+    # time.sleep(.5)
+    Output_Gross_Income = Base_Case_sheet['F4'].value - Base_Case_sheet['F5'].value
+    Output_Operating_Income = Output_Gross_Income - Base_Case_sheet['F7'].value
+    Output_Net_Income = Base_Case_sheet['F9'].value - Base_Case_sheet['F10'].value
 
-    if Base_Case_sheet['F6'] is not functions.gross_income(ticker=ticker,frequency='A',time=1):
+
+
+    # Checking to see if the calculated cells in the output file match the official numbers from morning star
+
+    if Output_Gross_Income >= (
+        functions.gross_income(ticker=ticker, frequency='A', time=1)[0] + 2) or Output_Gross_Income <= (
+        functions.gross_income(ticker=ticker, frequency='A', time=1)[0] - 2):
         print "Error in Gross income"
-    if Base_Case_sheet['F8'] is not functions.operating_income(ticker=ticker,time=1):
+        print "BASE CASE: ", Output_Gross_Income, "CSV: ", functions.gross_income(ticker=ticker, frequency='A', time=1)[0]
+    if Output_Operating_Income >= (
+        functions.operating_income(ticker=ticker, time=1)[0] + 2) or Output_Operating_Income <= (
+        functions.operating_income(ticker=ticker, time=1)[0] - 2):
         print "Error in Operating income"
-    if Base_Case_sheet['F12'] is not functions.net_income(ticker=ticker,frequency='A',time=1):
+        print "BASE CASE: ", Output_Operating_Income, "CSV: ", functions.operating_income(ticker=ticker, frequency='A', time=1)[0]
+    if Output_Net_Income >= (functions.net_income(ticker=ticker, frequency='A', time=1)[0] + 2 or Output_Net_Income <= (
+        functions.operating_income(ticker=ticker, time=1)[0] - 2)):
         print "Error in net income"
-    DCF_file.save("WSIG DCF Output.xlsx")
+        print "BASE CASE: ", Output_Net_Income, "CSV: ", functions.net_income(ticker=ticker, frequency='A', time=1)[0]
 
 
 def Automate_DCF(ticker):
@@ -175,8 +199,11 @@ def Automate_DCF(ticker):
     # Appends all three function dictionaries (income statement, cashflow statement, and balance sheet)
     # to one singular dict
     DCF_Data.update(get_income_statement(ticker=ticker))
+    time.sleep(.1)
     DCF_Data.update(get_cashflow_statements(ticker=ticker))
+    time.sleep(.1)
     DCF_Data.update(get_balance_sheet(ticker=ticker))
+    time.sleep(.1)
     # for key in DCF_Data:
     #     print "key: ", key, "       ", DCF_Data[key][0]
 
@@ -185,7 +212,7 @@ def Automate_DCF(ticker):
 
 
 def Begin():
-
+    functions.print_urls(ticker=ticker)
     # Preliminary function to set up sheets for proper automation
     Title_sheet = DCF_file.get_sheet_by_name("Title Page")
     Title_sheet['B4'] = ticker
