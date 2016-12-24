@@ -4,6 +4,7 @@ import quandl
 import time
 
 
+
 #****************************************READ ME***********************************
 
 # THIS IS ENTIRELY DEPENDANT ON MORNGINGSTAR; IF THEY DECIDE TO CHANGE THEIR URL ADDRESSES OR SHUTDOWN THIS
@@ -49,7 +50,7 @@ import time
 # Make sure to check and see if the data is reported in millions or thousands; if thousands then just truncate the nums
 
 #**************************TICKER************************
-ticker = "WLL"
+ticker = "AAPL"
 #********************************************************
 
 
