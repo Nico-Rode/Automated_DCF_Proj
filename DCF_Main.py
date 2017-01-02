@@ -50,7 +50,7 @@ import time
 # Make sure to check and see if the data is reported in millions or thousands; if thousands then just truncate the nums
 
 #**************************TICKER************************
-ticker = "AAPL"
+ticker = "CSCO"
 #********************************************************
 
 
@@ -108,7 +108,7 @@ def get_cashflow_statements(ticker): # FOR SOME REASON THIS IS THE QUARTERLY REP
 
     Cashflow_statement["Depreciation_and_amort"] = functions.depreciation_amort_expense(ticker=ticker,frequency='A',time=5)
     Cashflow_statement["CAPEX"] = functions.capital_expenditures(ticker=ticker,frequency='A',time=5)
-
+    time.sleep(.1)
     return Cashflow_statement
 
 def get_income_statement(ticker):
@@ -123,7 +123,7 @@ def get_income_statement(ticker):
 
     # Is net income formula wrong? It's off by the amount of "Other income expense" If you take it out of the formula
     # in row 12, then the numbers match up. Check it out
-
+    time.sleep(.1)
     return Income_statement
 
 def get_balance_sheet(ticker):
@@ -140,7 +140,7 @@ def get_balance_sheet(ticker):
     Balance_sheet["Total Liabilities"] = functions.total_liabilities(ticker=ticker,frequency='A',time=5)
     Balance_sheet["Total stockholder's equity"] = functions.total_stockholder_equity(ticker=ticker,frequency='A',time=5)
     #Balance_sheet["Change in working Capital"] = functions.working_capital() # This is an optional field in the DCF implement if you have time
-
+    time.sleep(.1)
     return Balance_sheet
 
 def populate_DCF(DCF_Data):
@@ -166,11 +166,12 @@ def populate_DCF(DCF_Data):
             counter += 1  # Makes sure that the DCF data gets all 5 of the entries for the metric
 
             # Holy shit. it works.
+    time.sleep(.1)
     print("Saving File")
     DCF_file.save("WSIG DCF Output2.xlsx")
     print("Saved File")
     # print("Waiting")
-    # time.sleep(.5)
+    time.sleep(.5)
     Output_Gross_Income = Base_Case_sheet['F4'].value - Base_Case_sheet['F5'].value
     Output_Operating_Income = Output_Gross_Income - Base_Case_sheet['F7'].value
     Output_Net_Income = Base_Case_sheet['F9'].value - Base_Case_sheet['F10'].value
